@@ -1,12 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""The setup script."""
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-
+from setuptools import setup, find_packages
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -21,26 +18,31 @@ requirements = [
     'beautifulsoup4'
 ]
 
+setup_requirements = [
+    'pytest-runner',
+]
+
 test_requirements = [
-    # TODO: put package test requirements here
+    'pytest',
 ]
 
 setup(
     name='wikiup',
     version='0.1.0',
-    description="Update Confluence wiki page content",
+    description="Sync up a local markdown file to a Confluence wiki page",
     long_description=readme + '\n\n' + history,
     author="Jesse Butcher",
-    author_email='boweeb@gmail.com',
-    url='https://github.com/boweeb/wikiup',
-    packages=[
-        'wikiup',
-    ],
-    package_dir={'wikiup':
-                 'wikiup'},
+    author_email='jbutcher@signetaccel.com',
+    url='https://git0.signetaccel.net/admintools/wikiup',
+    packages=find_packages(include=['wikiup']),
+    entry_points={
+        'console_scripts': [
+            'wikiup=wikiup.cli:main'
+        ]
+    },
     include_package_data=True,
     install_requires=requirements,
-    license="ISCL",
+    license="ISC license",
     zip_safe=False,
     keywords='wikiup',
     classifiers=[
@@ -54,5 +56,6 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
     test_suite='tests',
-    tests_require=test_requirements
+    tests_require=test_requirements,
+    setup_requires=setup_requirements,
 )
