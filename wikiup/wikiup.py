@@ -3,19 +3,38 @@
 """wikiup
 
 Usage:
-  wikiup update
+    wikiup update (-m <file> | --markdown <file>) (-w <wid> | --wiki-id <wid>) [-s <space> | --space <space>]
+                [-u <username> | --username <username>] [-p <password> | --password <password>]
+                [-t | --trim-h1]
 
-  wikiup -h | --help
-  wikiup --version
+    wikiup export (-w <wid> | --wiki-id <wid>) (-o <outfile> | --outfile=<outfile>)
 
-Any long-form option (id, file, profile, etc.) may also be specified as an environment variable of the form QUERV_$VAR
+    wikiup -h | --help
+    wikiup --version
+
+Options:
+    -m <file> --markdown=<file>          Input markdown file
+    -w <wid> --wiki-id=<wid>             Destination wiki page ID
+    -s <space> --space=<space>           Destination wiki page space (eg. "SYS" for "System Administration")
+    -u <username> --username=<username>  Username [default: jdoe]
+    -p <password> --password=<password>  Password [default: nopassword]
+    -t --trim-h1                         Trim the first level 1 header (useful if used as title in document content) [default: False]
+    -o <outfile> --outfile=<outfile>     File to export data to
+
+    -h --help                            Show this screen
+    --version                            Show version
+
+Any long-form option (id, file, profile, etc.) may also be specified as an environment variable of the form WIKIUP_$VAR
 where $VAR is the option in upper case.  Specifying an environment variable takes precedence of the CLI option.
+
+"space", "username", and "password" are required parameters even though the usage states optional.  This is to allow
+them to be specified as environment variables.
 
 """
 
 # from __future__ import unicode_literals, print_function
 
-# import os
+import os
 # import json
 from requests import get, put
 import re
@@ -26,37 +45,30 @@ from copy import deepcopy
 import difflib
 
 __author__ = 'Jesse Butcher'
-__email__ = 'boweeb@gmail.com'
+__email__ = 'jbutcher@signetaccel.com'
 __version__ = '0.1.0'
 
 
-# 3407907 -- Test
-# 2728955 -- Dog Tag
-# 2725585 -- Ansible
+def compose_url(wid):
+    protocol = 'https'
+    target_host = 'wiki.signetaccel.com'
+    target_path = '/rest/api/content'
 
-PID = 3407907
-USER_ = ''
-PASS_ = ''
+    url = f'{protocol}://{target_host}{target_path}/{wid}'
 
-FILE_IN = '/Users/jbutcher/Documents/Notes/hq-ca0.md'
-
-PROTOCOL = 'https'
-TARGET_HOST = 'wiki.signetaccel.com'
-TARGET_PATH = '/rest/api/content'
-
-PARAMETERS_ = {
-    'type': 'page',
-    'spaceKey': 'SYS',
-    'expand': 'body.storage,version,space'
-}
+    return url
 
 
-URL = f'{PROTOCOL}://{TARGET_HOST}{TARGET_PATH}/{PID}'
+def get_option(opt: str, args: dict) -> str:
+    opt_env = 'WIKIUP_{}'.format(opt.upper())
+    if opt_env in os.environ.keys():
+        return os.environ[opt_env]
+    else:
+        return args['--{}'.format(opt)]
 
 
-def get_latest():
-    response = get(URL, auth=(USER_, PASS_), params=PARAMETERS_)
-    # response = get(URL, auth=(USER_, PASS_))
+def get_latest(url, auth, parameters):
+    response = get(url, auth=auth, params=parameters)
     if response.status_code == 200:
         if response.headers['Content-Type'] == 'application/json':
             # print(json.dumps(response.json(), indent=4))
@@ -70,7 +82,7 @@ def compose_data(obj, data_in=""):
     if data_in != obj['body']['storage']['value']:
         a = data_in.splitlines()
         b = obj['body']['storage']['value'].splitlines()
-        diff = difflib.unified_diff(a, b, 'Parsed Markdown', 'Scraped from Wiki', lineterm="")
+        diff = difflib.unified_diff(a, b, 'Scraped from Wiki', 'Parsed Markdown', lineterm="")
         print('\n'.join(list(diff)))
         print('\nConfirm change')
         input("Press Enter to continue...")
@@ -101,8 +113,8 @@ def compose_data(obj, data_in=""):
     return changed, data_out
 
 
-def put_(data):
-    response = put(URL, auth=(USER_, PASS_), json=data, )
+def put_(url, auth, data):
+    response = put(url, auth=auth, json=data)
 
     return response.status_code
 
@@ -167,15 +179,12 @@ def parse_md(file_in):
         # return EntitySubstitution.substitute_html(string).replace('"', '&quot;').replace("'", '&apos;')
         return EntitySubstitution.substitute_html(string).replace('"', '&quot;')
 
-    # for string in soup.strings:
-    #     string.replace_with(string.replace('"', '&quot;'))
-
-    # soup2_string = str(soup2).lstrip().rstrip()
     soup2_string = soup2.encode(formatter=custom_formatter).lstrip().rstrip()
 
-    # print(soup2_string)
-    # exit()
-    return soup2_string.decode(encoding='utf-8')
+    reg = re.compile(r'REDACT(<|&lt;)-{2,}.+-{2,}(>|&gt;)', re.MULTILINE)
+    soup2_string = re.sub(reg, '[--REDACTED--]', soup2_string.decode(encoding='utf-8'))
+
+    return soup2_string
 
 
 def main():
@@ -185,19 +194,32 @@ def main():
     # args_pp = json.dumps(args, indent=4)
     # print(f'args: {args_pp}')
 
-    if args.update:
-        latest = get_latest()
+    if args['update']:
+        file_in = get_option('markdown', args)
+        auth = (get_option('username', args), get_option('password', args))
+        url = compose_url(wid=get_option('wiki-id', args))
+        # print(f'file_in: {file_in}\nauth: {auth}\nurl: {url}\n')
+        space = get_option('space', args)
+        parameters = {
+            'type': 'page',
+            'spaceKey': space,
+            'expand': 'body.storage,version,space'
+        }
 
-        md = parse_md(FILE_IN)
+        latest = get_latest(url, auth, parameters)
+
+        md = parse_md(file_in)
         data_changed, data = compose_data(latest, md)
         if data_changed:
             data_terse = deepcopy(data)
             data_terse['body']['storage']['value'] = '...'
             print(f'Putting: {data_terse}')
 
-            sc = put_(data)
+            sc = put_(url, auth, data)
             print(f'Status Code: {sc}')
-
+    elif args['export']:
+        # TODO
+        raise NotImplementedError
 
 if __name__ == '__main__':
     main()
