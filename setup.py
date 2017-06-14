@@ -37,7 +37,7 @@ setup(
     packages=find_packages(include=['wikiup']),
     entry_points={
         'console_scripts': [
-            'wikiup=wikiup.cli:main'
+            'wikiup=wikiup.wikiup:main'
         ]
     },
     include_package_data=True,

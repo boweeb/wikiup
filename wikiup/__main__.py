@@ -3,4 +3,8 @@
 # -*- coding: utf-8 -*-
 
 
-"""Top-level package for wikiup."""
+"""wikiup.__main__: executed when bootstrap directory is called as script."""
+
+
+from .wikiup import main
+main()

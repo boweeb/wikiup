@@ -3,4 +3,11 @@
 # -*- coding: utf-8 -*-
 
 
-"""Top-level package for wikiup."""
+"""Dev Runner"""
+
+
+from wikiup.wikiup import main
+
+
+if __name__ == '__main__':
+    main()
