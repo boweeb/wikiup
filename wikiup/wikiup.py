@@ -62,7 +62,7 @@ from .utils import get_option, compose_url
 
 __author__ = """Jesse Butcher"""
 __email__ = 'jbutcher@signetaccel.com'
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 # C = GlobalConfig()
