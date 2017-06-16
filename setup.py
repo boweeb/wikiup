@@ -29,7 +29,7 @@ test_requirements = [
 
 setup(
     name='wikiup',
-    version='0.2.0',
+    version='0.2.1',
     description="Sync up a local markdown file to a Confluence wiki page",
     long_description=readme + '\n\n' + history,
     author="Jesse Butcher",
