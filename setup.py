@@ -15,7 +15,8 @@ requirements = [
     'docopt',
     'requests',
     'paka.cmark',
-    'beautifulsoup4'
+    'beautifulsoup4',
+    'pyxdg',
 ]
 
 setup_requirements = [

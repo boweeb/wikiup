@@ -1,4 +1,5 @@
 #!/usr/bin/env python3.6
+# vim: set fileencoding=utf-8 tabstop=8 expandtab shiftwidth=4 softtabstop=4 smarttab autoindent:
 # -*- coding: utf-8 -*-
 
 
@@ -52,7 +53,7 @@ Examples:
 
 from docopt import docopt
 
-# from .transient import update
+# from .config import GlobalConfig
 from .document import MarkdownDocument
 from .page import WikiPage
 from .broker import Broker
@@ -62,6 +63,9 @@ from .utils import get_option, compose_url
 __author__ = """Jesse Butcher"""
 __email__ = 'jbutcher@signetaccel.com'
 __version__ = '0.1.0'
+
+
+# C = GlobalConfig()
 
 
 def main():
@@ -102,5 +106,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-# vim:fileencoding=utf-8

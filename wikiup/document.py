@@ -12,7 +12,11 @@ from pathlib import Path
 from bs4 import BeautifulSoup, element
 from paka import cmark
 
+from .config import GlobalConfig
 from .utils import non_newlines, custom_formatter
+
+
+C = GlobalConfig()
 
 
 class MarkdownDocument(object):
@@ -71,10 +75,10 @@ class MarkdownDocument(object):
         for code_block in self._soup.find_all('pre'):
             new_cb_tag = self._soup.new_tag('ac:structured-macro')
             new_cb_tag.attrs['ac:name'] = 'code'
-            cb_name = self._soup.new_tag('ac:parameter')
-            cb_name.attrs['ac:name'] = 'theme'
+            cb_theme = self._soup.new_tag('ac:parameter')
+            cb_theme.attrs['ac:name'] = 'theme'
             # TODO: make theme configurable
-            cb_name.string = 'Midnight'
+            cb_theme.string = C.theme
             cb_language = self._soup.new_tag('ac:parameter')
             cb_language.attrs['ac:name'] = 'language'
             cb_language.string = code_block.code.attrs['class'][0].split('-')[1]
@@ -82,7 +86,7 @@ class MarkdownDocument(object):
 
             cb_content.string = element.CData(code_block.code.string)
 
-            new_cb_tag.append(cb_name)
+            new_cb_tag.append(cb_theme)
             new_cb_tag.append(cb_language)
             new_cb_tag.append(cb_content)
 
@@ -94,16 +98,18 @@ class MarkdownDocument(object):
         soup_string = self._soup.encode(formatter=custom_formatter).lstrip().rstrip()
 
         # Replace redaction tagged text with redaction text
-        reg = re.compile(r'REDACT(<|&lt;)-{2,}.+-{2,}(>|&gt;)', re.MULTILINE)
-        soup_string = re.sub(reg, '[--REDACTED--]', soup_string.decode(encoding='utf-8'))
+        soup_string = re.sub(C.redact_re,
+                             C.redaction_replacement_text,
+                             soup_string.decode(encoding='utf-8'))
 
         return soup_string
 
     def _transform(self):
 
         # These mutate self.soup
-        # TODO: should be able to toggle these with the configuration file
-        self._strip_marxico()
-        self._convert_codeblocks()
+        if C.strip_marxico:
+            self._strip_marxico()
+        if C.convert_codeblocks:
+            self._convert_codeblocks()
 
         self.content = self._clean()
