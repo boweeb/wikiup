@@ -49,7 +49,7 @@ Examples:
 
 """
 
-
+import getpass
 from docopt import docopt
 
 # from .config import GlobalConfig
@@ -75,6 +75,10 @@ def main():
     # print(f'args: {args_pp}')
 
     if args['update']:
+
+        if get_option('password', args) == 'nopassword' :
+            args['password'] = getpass.getpass()
+
         manifest = {
             'markdown': {
                 'file_in': get_option('markdown', args),
