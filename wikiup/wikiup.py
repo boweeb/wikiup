@@ -10,7 +10,6 @@ Sync up a local markdown file to a Confluence wiki page
 Usage:
     wikiup update (-m <file> | --markdown <file>) (-w <wid> | --wiki-id <wid>) [-s <space> | --space <space>]
                 [-u <username> | --username <username>] [-p <password> | --password <password>]
-                [-t | --trim-h1]
     wikiup export (-w <wid> | --wiki-id <wid>) (-o <outfile> | --outfile=<outfile>)
 
     wikiup -h | --help
