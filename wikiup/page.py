@@ -43,6 +43,12 @@ class WikiPage(object):
             if response.headers['Content-Type'] == 'application/json':
                 # print(json.dumps(response.json(), indent=4))
                 pass
+            else:
+                raise ValueError('Content-Type did not equal "application/json"')
+        elif response.status_code == 401:
+            raise ValueError('Authentication error while fetching wiki content')
+        else:
+            raise ValueError(f'Bad status code while fetching wiki content ({response.status_code})')
 
         self.data = response.json()
         self.get_result_code = response.status_code
