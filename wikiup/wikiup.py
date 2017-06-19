@@ -62,7 +62,7 @@ from .utils import get_option, compose_url, require_password
 
 __author__ = """Jesse Butcher"""
 __email__ = 'jbutcher@signetaccel.com'
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 # C = GlobalConfig()
