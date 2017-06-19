@@ -6,7 +6,16 @@
 """wikiup.utils"""
 
 import os
+import getpass
 from bs4.dammit import EntitySubstitution
+
+
+def require_password(password: str=None):
+    if not password:
+        return_ = getpass.getpass()
+    else:
+        return_ = password
+    return str(return_)
 
 
 def get_option(opt: str, args: dict) -> str:

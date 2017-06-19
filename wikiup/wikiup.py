@@ -9,7 +9,8 @@ Sync up a local markdown file to a Confluence wiki page
 
 Usage:
     wikiup update (-m <file> | --markdown <file>) (-w <wid> | --wiki-id <wid>) [-s <space> | --space <space>]
-                [-u <username> | --username <username>] [-p <password> | --password <password>]
+                  [-u <username> | --username <username>] [-p <password> | --password <password>]
+                  [-t | --trim-h1]
     wikiup export (-w <wid> | --wiki-id <wid>) (-o <outfile> | --outfile=<outfile>)
 
     wikiup -h | --help
@@ -20,7 +21,7 @@ Options:
     -w <wid> --wiki-id=<wid>             Destination wiki page ID
     -s <space> --space=<space>           Destination wiki page space (eg. "SYS" for "System Administration")
     -u <username> --username=<username>  Username [default: johnsmith]
-    -p <password> --password=<password>  Password [default: nopassword]
+    -p <password> --password=<password>  Password
     -t --trim-h1                         Trim the first level 1 header (useful if used as title in document content)
                                          [default: False]
     -o <outfile> --outfile=<outfile>     File to export data to
@@ -49,14 +50,14 @@ Examples:
 
 """
 
-import getpass
+
 from docopt import docopt
 
 # from .config import GlobalConfig
 from .document import MarkdownDocument
 from .page import WikiPage
 from .broker import Broker
-from .utils import get_option, compose_url
+from .utils import get_option, compose_url, require_password
 
 
 __author__ = """Jesse Butcher"""
@@ -75,16 +76,14 @@ def main():
     # print(f'args: {args_pp}')
 
     if args['update']:
-
-        if get_option('password', args) == 'nopassword' :
-            args['password'] = getpass.getpass()
+        password = require_password(get_option('password', args))
 
         manifest = {
             'markdown': {
                 'file_in': get_option('markdown', args),
             },
             'page': {
-                'auth': (get_option('username', args), get_option('password', args)),
+                'auth': (get_option('username', args), password),
                 'url': compose_url(wid=get_option('wiki-id', args)),
                 'slug': get_option('wiki-id', args),
                 'parameters': {
