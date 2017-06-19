@@ -20,8 +20,8 @@ Options:
     -m <file> --markdown=<file>          Input markdown file
     -w <wid> --wiki-id=<wid>             Destination wiki page ID
     -s <space> --space=<space>           Destination wiki page space (eg. "SYS" for "System Administration")
-    -u <username> --username=<username>  Username [default: johnsmith]
-    -p <password> --password=<password>  Password
+    -u <username> --username=<username>  Username (will default to shell's $USER)
+    -p <password> --password=<password>  Password (if not provided will prompt for input)
     -t --trim-h1                         Trim the first level 1 header (useful if used as title in document content)
                                          [default: False]
     -o <outfile> --outfile=<outfile>     File to export data to
@@ -57,7 +57,7 @@ from docopt import docopt
 from .document import MarkdownDocument
 from .page import WikiPage
 from .broker import Broker
-from .utils import get_option, compose_url, require_password
+from .utils import get_option, compose_url, require_password, get_shell_username
 
 
 __author__ = """Jesse Butcher"""
@@ -76,6 +76,7 @@ def main():
     # print(f'args: {args_pp}')
 
     if args['update']:
+        username = get_shell_username(get_option('username', args))
         password = require_password(get_option('password', args))
 
         manifest = {
@@ -83,7 +84,7 @@ def main():
                 'file_in': get_option('markdown', args),
             },
             'page': {
-                'auth': (get_option('username', args), password),
+                'auth': (username, password),
                 'url': compose_url(wid=get_option('wiki-id', args)),
                 'slug': get_option('wiki-id', args),
                 'parameters': {

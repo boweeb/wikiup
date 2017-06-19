@@ -10,6 +10,14 @@ import getpass
 from bs4.dammit import EntitySubstitution
 
 
+def get_shell_username(username):
+    if not username:
+        return_ = os.environ['USER']
+    else:
+        return_ = username
+    return str(return_)
+
+
 def require_password(password: str=None):
     if not password:
         return_ = getpass.getpass()
