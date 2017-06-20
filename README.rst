@@ -8,6 +8,7 @@ Sync up a local markdown file to a Confluence wiki page
 "commonmark".
 
 * CommonMark website_
+
   - http://spec.commonmark.org -- The CommonMark specification.
   - http://code.commonmark.org -- Reference implementation and validation test suite on GitHub.
   - http://talk.commonmark.org -- Public discussion area and mailing list.
@@ -42,9 +43,11 @@ TODO
 * [*Core*] Handle errors from markdown processor
 * [*Feature*] Offer choice to save `md.contents` and `page.contents` to files for offline `diff` comparison.
 * [*Core*] Allow an optional git-based workflow for storing markdown files
+
   - wiki pages get updated after a post-commit trigger
   - wiki pages should have head note to the effect of, "This page is wikiup controlled. Only makes edits from repo!"
   - `wikiup` becomes a backend tool and the UX changes to `git commit`.
+
 * [*Core*] Make the "continue if you approve diff" prompt more flexible, accepting more/different actions
 * [*Feature*] Add auto-accept flag and standardize a "silent"/"unattended" mode
 
